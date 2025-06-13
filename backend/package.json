@@ -7,7 +7,7 @@
     "dev": "ts-node src/index.ts",
     "build": "tsc",
     "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
-    "start": "nodemon"
+    "start": "nodemon ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",
