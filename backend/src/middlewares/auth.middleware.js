@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import prisma from "../DB/db.config.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import prisma from "../../DB/db.config.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
 
 export const verifyJWT = async (req, res, next) => {
   try {
