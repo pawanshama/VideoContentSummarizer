@@ -4,25 +4,38 @@ import { AppDataSource } from '../data-source';
 import { User } from '../entity/User'; // Import your User entity
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
-import dotenv, { config } from "dotenv";
-dotenv.config();
+// import dotenv, { config } from "dotenv";
+// dotenv.config();
 
 export const signUsers = async (req: Request, res: Response) => {
   try {
     const {name,email,password_hash} = req.body;
     const userRepository = AppDataSource.getRepository(User);
-    const users = await userRepository.find({}); // Find all users
-    if(users.length>0){
+    const users = await userRepository.findOneBy({email}); // Find all users
+    if(users){
         return res.status(409).json({message:"Users already exists"});
     }
     //hashing the password for protection
     const hashedPassword = await bcrypt.hash(password_hash,10);
     const newUser = userRepository.create({ name, email,password_hash:hashedPassword});
     await userRepository.save(newUser);
+    if(process.env.JWT_SECRET){
+      const signing = jwt.sign(newUser.id, process.env.JWT_SECRET ,{expiresIn:'7h'});
+      
+      res.cookie("token",signing,{
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite:'strict',
+        httpOnly:true
+      });
+    }
+    else{
+      return res.status(500).json({message:"error in backend"})
+    }
+
     if(!newUser){
       return res.json(404).json({message:"User parameter not matched"});
     }
-    return res.status(201).json({users,message:"User Created"});
+    return res.status(201).json({newUser,message:"User Created"});
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Failed to fetch users" });

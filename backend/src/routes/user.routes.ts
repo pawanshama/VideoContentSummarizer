@@ -5,7 +5,7 @@ import {checkAdmin} from "../middlewares/admin";
 
 const router = Router();
 
-router.get('/signup', signUsers);
+router.post('/signup', signUsers);
 router.post('/login',checkAdmin, loginUser);
 
 export default router;

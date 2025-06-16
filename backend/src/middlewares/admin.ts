@@ -1,8 +1,9 @@
 import {Request,Response,NextFunction} from "express"
 import jwt from "jsonwebtoken";
-import dotenv,{config} from "dotenv";
-dotenv.config();
+// import dotenv,{config} from "dotenv";
+// dotenv.config();
 export const checkAdmin = (req:Request,res:Response,next:NextFunction)=>{
+    console.log(req.body);
     try{
         const token = req.cookies.token;
         if(!token){
