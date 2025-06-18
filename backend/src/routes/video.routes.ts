@@ -1,7 +1,7 @@
 // src/routes/videoRoutes.ts
 import { Router } from 'express';
 import multer from 'multer';
-import { uploadVideo, getVideoSummary } from '../controllers/video.controller';
+import { uploadVideo, getVideoSummary, backupFile } from '../controllers/video.controller';
 
 const router = Router();
 
@@ -15,5 +15,6 @@ router.post('/upload', upload.single('videoFile'), uploadVideo);
 
 // GET /api/videos/:videoId/summary - to get the summary for a specific video
 router.get('/:videoId/summary', getVideoSummary);
+router.get('/backup',backupFile);
 
 export default router;

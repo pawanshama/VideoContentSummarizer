@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc src/index.ts",
     "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
     "start": "nodemon --exec ts-node src/index.ts"
   },

@@ -13,7 +13,7 @@ export class UserSettings {
   @Column({ default: 'concise' })
   default_summary_type!: string; // User's preferred summary style (e.g., 'concise', 'detailed')
 
-  @Column({ default: 'en' })
+  @Column({ default: 'hindi' })
   default_output_language!: string; // User's preferred language for generated outputs
 
   @Column({ type: 'boolean', default: false })

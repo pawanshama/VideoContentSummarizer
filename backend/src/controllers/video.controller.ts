@@ -156,3 +156,18 @@ export const getVideoSummary = async (req: Request, res: Response) => {
 };
 
 // Add more video-related controller functions (e.g., list all videos for a user, delete video)
+
+export const backupFile = async (req:Request,res:Response) => {
+    try{
+        const {user_id} = req.body;
+        const videoRepository = AppDataSource.getRepository(Video);
+        const uniqueUserBackedData = await videoRepository.findBy({user_id});
+        if(uniqueUserBackedData.length==0){
+          return res.status(404).json({data:uniqueUserBackedData,message:"User Data Not found"});
+        }
+        return res.status(200).json({message:"all previous searches",data:uniqueUserBackedData});
+    } 
+    catch(error){
+       return res.status(500).json({message:"Internal Server Error",error});
+    }
+}

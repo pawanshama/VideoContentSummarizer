@@ -19,8 +19,9 @@ export const signUsers = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password_hash,10);
     const newUser = userRepository.create({ name, email,password_hash:hashedPassword});
     await userRepository.save(newUser);
+    // console.log(newUser);
     if(process.env.JWT_SECRET){
-      const signing = jwt.sign(newUser.id, process.env.JWT_SECRET ,{expiresIn:'7h'});
+      const signing = jwt.sign({id:newUser.id}, process.env.JWT_SECRET ,{expiresIn:'7h'});
       
       res.cookie("token",signing,{
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -31,7 +32,7 @@ export const signUsers = async (req: Request, res: Response) => {
     else{
       return res.status(500).json({message:"error in backend"})
     }
-
+    // console.log(newUser);
     if(!newUser){
       return res.json(404).json({message:"User parameter not matched"});
     }
@@ -51,12 +52,13 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({message:"User not found"});
     }
     
-    const verify = bcrypt.compare(password_hash,newUser.password_hash);
+    const verify = await bcrypt.compare(password_hash,newUser.password_hash);
+    // console.log("position 3",verify);
     if(!verify){
       return res.status(400).json({message:"password not matched"});
     }
     if(process.env.JWT_SECRET){
-      const signing = jwt.sign(newUser.id, process.env.JWT_SECRET ,{expiresIn:'7h'});
+      const signing = jwt.sign({id:newUser.id}, process.env.JWT_SECRET ,{expiresIn:'7h'});
       
       res.cookie("token",signing,{
         maxAge: 7 * 24 * 60 * 60 * 1000,
