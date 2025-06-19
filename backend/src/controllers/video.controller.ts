@@ -159,7 +159,8 @@ export const getVideoSummary = async (req: Request, res: Response) => {
 
 export const backupFile = async (req:Request,res:Response) => {
     try{
-        const {user_id} = req.body;
+        const {user_id} = req.params;
+        console.log(user_id);
         const videoRepository = AppDataSource.getRepository(Video);
         const uniqueUserBackedData = await videoRepository.findBy({user_id});
         if(uniqueUserBackedData.length==0){

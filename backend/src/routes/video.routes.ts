@@ -15,6 +15,6 @@ router.post('/upload', upload.single('videoFile'), uploadVideo);
 
 // GET /api/videos/:videoId/summary - to get the summary for a specific video
 router.get('/:videoId/summary', getVideoSummary);
-router.get('/backup',backupFile);
+router.get('/backup/:user_id',backupFile);
 
 export default router;
