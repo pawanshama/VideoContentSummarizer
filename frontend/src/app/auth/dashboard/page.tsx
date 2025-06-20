@@ -1,8 +1,12 @@
+'use client';
 import React from 'react'
 import Navbar from '@/components/navbar'
 import Sidebar from '@/components/Sidebar'
+import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks'
+
 
 export default function page() {
+       
   return (
     <div className='h-full flex flex-col m-0 p-0 w-full'>
       <div> <Navbar/></div>

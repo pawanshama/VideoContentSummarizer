@@ -1,0 +1,109 @@
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
+import type { RootState } from '../../store/store'
+import type { AuthState,AllInOneState,UploadState,videoState } from '@/services/types/Auth'
+import {createAuth,createVideo,createTranscript,createSummary} from '../../types/factories';
+
+// Define the initial state using that type
+const initialState: AllInOneState = {
+  auth: createAuth(),
+  status: { loading: false, failed: false, success: false },
+  videoUpload: { video: createVideo() },
+  video: {
+    video: createVideo(),
+    transcript: createTranscript(),
+    summary: createSummary()
+  },
+  backedFile: {
+    id: '',
+    user_id: '',
+    video_id: '',
+    title: '',
+    description: null,
+    storage_url: '',
+    original_filename: '',
+    duration_seconds: '',
+    processing_status: '',
+    created_at: ''
+  },
+  token: { token: '' }
+};
+
+export const AuthSlice = createSlice({
+  name: 'auth',
+  // `createSlice` will infer the state type from the `initialState` argument
+  initialState,
+  reducers: {
+    // Use the PayloadAction type to declare the contents of `action.payload`
+    updateAuthByPayload: (state, action: PayloadAction<AuthState>) => {
+      state.auth.name = action.payload.id,
+      state.auth.id = action.payload.id,
+      state.auth.email = action.payload.email,
+      state.auth.password_hash = action.payload.password_hash,
+      state.auth.status = action.payload.status,
+      state.auth.subscription = action.payload.subscription,
+      state.auth.created_at = action.payload.created_at,
+      state.auth.updated_at = action.payload.updated_at
+    },
+    clearAuth:(state)=>{
+      state.auth = initialState.auth
+    }
+  },
+})
+
+export const VideoIdSlice = createSlice({
+  name: 'videoId',
+  // `createSlice` will infer the state type from the `initialState` argument
+  // initialState,
+  initialState,
+  reducers: {
+    // Use the PayloadAction type to declare the contents of `action.payload`
+    updateVideoIdByPayload: (state, action: PayloadAction<UploadState>) => {
+      state.videoUpload.video.id = action.payload.video.id,
+      state.videoUpload.video.processing_status = action.payload.video.processing_status
+      state.videoUpload.video.title = action.payload.video.title
+      state.videoUpload.video.storage_url = action.payload.video.storage_url
+    },
+    clearVideoId:(state)=>{
+      state.videoUpload = initialState.videoUpload
+    }
+  },
+})
+
+export const VideoSlice = createSlice({
+  name: 'video',
+  // `createSlice` will infer the state type from the `initialState` argument
+  initialState,
+  reducers: {
+    // Use the PayloadAction type to declare the contents of `action.payload`
+    updateVideoByPayload: (state, action: PayloadAction<videoState>) => {
+      state.video.video.id = action.payload.video.id,
+      state.video.video.processing_status = action.payload.video.processing_status,
+      state.video.video.storage_url = action.payload.video.storage_url,
+      state.video.video.title = action.payload.video.title,
+      state.video.transcript.id = action.payload.transcript.id,
+      state.video.transcript.content = action.payload.transcript.content,
+      state.video.transcript.model_used = action.payload.transcript.model_used,
+      state.video.transcript.tone_version = action.payload.transcript.tone_version
+      state.video.summary.id = action.payload.summary.id
+      state.video.summary.model_used = action.payload.summary.model_used
+      state.video.summary.type = action.payload.summary.type
+      state.video.summary.text = action.payload.summary.text
+    },
+    clearVideo:(state)=>{
+        state.video = initialState.video
+    }
+  },
+})
+
+export const { updateAuthByPayload } = AuthSlice.actions
+export const {updateVideoIdByPayload} = VideoIdSlice.actions
+export const {updateVideoByPayload} = VideoSlice.actions
+
+// Other code such as selectors can use the imported `RootState` type
+export const selectCount = (state: RootState) => state.auth
+
+export default AuthSlice.reducer
+
+export const videoIdReducer = VideoIdSlice.reducer
+export const videoReducer = VideoSlice.reducer

@@ -132,7 +132,7 @@ export const getVideoSummary = async (req: Request, res: Response) => {
       video: {
         id: video.id,
         title: video.title,
-        status: video.processing_status,
+        processing_status: video.processing_status,
         storage_url: video.storage_url,
       },
       transcript: transcript ? {

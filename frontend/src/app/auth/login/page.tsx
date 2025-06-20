@@ -1,13 +1,17 @@
-'use client'
+'use client';
 import React, { useState } from 'react'
 import { FaFacebookMessenger } from "react-icons/fa";
 import getInstance from '@/lib/utility/util';
 import { useRouter } from 'next/navigation';
+import { updateVideoByPayload, updateVideoIdByPayload, updateAuthByPayload } from '@/services/features/counter/auth.state'
+import { useGetUserQuery,useUpdateUserMutation } from '@/services/api';
+// import { AuthState } from '@/services/types/Auth';
 
 export default function page() {
     const appName = "AI buddy"
     const [formData,setFormData] = useState({email:"",password_hash:""});
     const router = useRouter();
+    // const [update,{data,isLoading,error}] = useUpdateUserMutation(formData);
 
     const handleUserInput = (event:React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();

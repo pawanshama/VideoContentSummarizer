@@ -1,4 +1,6 @@
+import { store } from "@/services/store/store";
 import type { Metadata } from "next";
+import { Provider } from "react-redux";
 // import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,12 +14,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+   
+
     <html lang="en">
       <body
         className={` antialiased`}
-      >
-        {children}
+        >
+          <Provider store={store}>
+            {children}
+          </Provider>
       </body>
     </html>
+        // </Provider>
   );
 }
