@@ -8,8 +8,10 @@ import jwt from "jsonwebtoken"
 // dotenv.config();
 
 export const signUsers = async (req: Request, res: Response) => {
+
   try {
     const {name,email,password_hash} = req.body;
+    if(name.trim()==="" || email.trim()==="" || password_hash.trim()==="" || password_hash.length<6)return res.status(400).json("Bad Request");
     const userRepository = AppDataSource.getRepository(User);
     const users = await userRepository.findOneBy({email}); // Find all users
     if(users){

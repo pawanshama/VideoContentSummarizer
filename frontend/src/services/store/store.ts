@@ -1,6 +1,6 @@
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer,{videoIdReducer,videoReducer} from '../features/counter/auth.state';
+import authReducer,{backedFileReducer, videoIdReducer,videoReducer} from '../features/counter/auth.state';
 import { api } from '../api';
 
 export const store = configureStore({
@@ -8,6 +8,7 @@ export const store = configureStore({
          auth: authReducer,
          videoId:videoIdReducer,
          video:videoReducer,
+         backedFile:backedFileReducer,
         [api.reducerPath]: api.reducer,
    },
    middleware: (getDefaultMiddleware) =>

@@ -69,6 +69,6 @@ export interface AllInOneState{
    status:StatusState,
    videoUpload:UploadState,
    video: videoState
-   backedFile:BackedupState,
+   backedFile:BackedupState[],
    token:tok
 };

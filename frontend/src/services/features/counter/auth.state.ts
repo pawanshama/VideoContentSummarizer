@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../../store/store'
-import type { AuthState,AllInOneState,UploadState,videoState } from '@/services/types/Auth'
+import type { AuthState,AllInOneState,UploadState,videoState,BackedupState } from '@/services/types/Auth'
 import {createAuth,createVideo,createTranscript,createSummary} from '../../types/factories';
 
 // Define the initial state using that type
@@ -14,19 +14,19 @@ const initialState: AllInOneState = {
     transcript: createTranscript(),
     summary: createSummary()
   },
-  backedFile: {
-    id: '',
-    user_id: '',
-    video_id: '',
-    title: '',
-    description: null,
-    storage_url: '',
-    original_filename: '',
-    duration_seconds: '',
-    processing_status: '',
-    created_at: ''
-  },
-  token: { token: '' }
+  backedFile: [{
+      id: '',
+      user_id: '',
+      video_id: '',
+      title: '',
+      description: null,
+      storage_url: '',
+      original_filename: '',
+      duration_seconds: '',
+      processing_status: '',
+      created_at: ''
+    }],
+    token: { token: '' }
 };
 
 export const AuthSlice = createSlice({
@@ -36,14 +36,15 @@ export const AuthSlice = createSlice({
   reducers: {
     // Use the PayloadAction type to declare the contents of `action.payload`
     updateAuthByPayload: (state, action: PayloadAction<AuthState>) => {
-      state.auth.name = action.payload.id,
-      state.auth.id = action.payload.id,
-      state.auth.email = action.payload.email,
-      state.auth.password_hash = action.payload.password_hash,
-      state.auth.status = action.payload.status,
-      state.auth.subscription = action.payload.subscription,
-      state.auth.created_at = action.payload.created_at,
-      state.auth.updated_at = action.payload.updated_at
+      state.auth.name = action.payload.newUser.name,
+      state.auth.id = action.payload.newUser.id,
+      state.auth.email = action.payload.newUser.email,
+      state.auth.password_hash = action.payload.newUser.password_hash,
+      state.auth.status = action.payload.newUser.status,
+      state.auth.subscription = action.payload.newUser.subscription,
+      state.auth.created_at = action.payload.newUser.created_at,
+      state.auth.updated_at = action.payload.newUser.updated_at
+      console.log(action.payload);
     },
     clearAuth:(state)=>{
       state.auth = initialState.auth
@@ -96,14 +97,28 @@ export const VideoSlice = createSlice({
   },
 })
 
-export const { updateAuthByPayload } = AuthSlice.actions
-export const {updateVideoIdByPayload} = VideoIdSlice.actions
-export const {updateVideoByPayload} = VideoSlice.actions
+export const BackedFilesSlice = createSlice({
+  name:'sidebar',
+  initialState,
+  reducers:{
+    getSidebar:(state,action:PayloadAction<BackedupState[]>) => {
+        state.backedFile = action.payload
+    },
+    clearGetSidebar:(state)=>{
+      state.backedFile = initialState.backedFile
+    }
+  }
+})
+
+export const { updateAuthByPayload,clearAuth } = AuthSlice.actions
+export const {updateVideoIdByPayload,clearVideoId} = VideoIdSlice.actions
+export const {updateVideoByPayload,clearVideo} = VideoSlice.actions
+export const {getSidebar,clearGetSidebar} = BackedFilesSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCount = (state: RootState) => state.auth
 
 export default AuthSlice.reducer
-
+export const backedFileReducer = BackedFilesSlice.reducer
 export const videoIdReducer = VideoIdSlice.reducer
 export const videoReducer = VideoSlice.reducer

@@ -1,12 +1,15 @@
 'use client';
+import { store } from '@/services/store/store';
 import React from 'react'
+import { Provider } from 'react-redux';
 
 const page = () => {
   return (
-    <main>
-       
-       <h1>djskahdkh</h1>
-    </main>
+    <>
+    <Provider store={store}>
+      <h1>jdksdkjkj</h1>
+    </Provider>
+    </>
   )
 }
 
