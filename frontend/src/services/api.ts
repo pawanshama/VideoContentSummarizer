@@ -1,14 +1,14 @@
 // src/lib/redux/api.ts
-import type { AuthState, BackedupState, UploadState } from './types/Auth';
+import type { AuthState, BackedupState, summarState, summaryState, UploadState, videoState } from './types/Auth';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { User }  from '@/services/types/User'
 
 
 export const api = createApi({
   reducerPath: 'api', // optional but recommended
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8001/api/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8001/api/',credentials:'include' }),
   endpoints: (builder) => ({
-    getUser: builder.query< BackedupState[],String>({
+    getUser: builder.query< summarState[],String>({
       //fetching uploaded videos of a user
       query: (id) => `videos/backup/${id}`,
     }),
@@ -36,17 +36,31 @@ export const api = createApi({
         body: patch,
       }),
     }),
-    uploadUserVideo:builder.mutation<UploadState,{formData: FormData,user_id:any}>({
-       query:(patch)=>{
+    uploadUserVideo:builder.mutation<UploadState,{formData: FormData}>({
+       query:({formData})=>{
+        // const formData = patch.formData;
+        
+        // for (let pair of formData.entries()) {
+        //   console.log('Uploading:', pair[0], pair[1]);
+        // }
         return {
           url:`videos/upload`,
           method:'POST',
-          body:patch
+          body:formData,
+          formData:true
         }
        }
     }),
-    
+    getVideoSummary:builder.query<videoState,any>({
+         query:(videoId)=>`videos/${videoId}/summary`
+    }),
+    checkProtected:builder.query<boolean,void>({
+      query:()=>({
+        url:`/users/protected`
+      })
+    })
     }),
 });
 
-export const { useGetUserQuery,useLazyGetUserQuery,useUpdateUserMutation,useUpdateUserLoginMutation,useUploadUserVideoMutation } = api;
+export const { useGetUserQuery,useLazyGetUserQuery,useUpdateUserMutation,useUpdateUserLoginMutation,
+  useUploadUserVideoMutation,useGetVideoSummaryQuery,useLazyGetVideoSummaryQuery,useLazyCheckProtectedQuery} = api;

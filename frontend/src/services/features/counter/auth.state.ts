@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../../store/store'
-import type { AuthState,AllInOneState,UploadState,videoState,BackedupState } from '@/services/types/Auth'
+import type { AuthState,AllInOneState,UploadState,videoState,BackedupState, summaryState, summarState } from '@/services/types/Auth'
 import {createAuth,createVideo,createTranscript,createSummary} from '../../types/factories';
 
 // Define the initial state using that type
@@ -14,19 +14,17 @@ const initialState: AllInOneState = {
     transcript: createTranscript(),
     summary: createSummary()
   },
-  backedFile: [{
-      id: '',
-      user_id: '',
-      video_id: '',
-      title: '',
-      description: null,
-      storage_url: '',
-      original_filename: '',
-      duration_seconds: '',
-      processing_status: '',
-      created_at: ''
+  summar: [{
+      created_at: '',
+      id:'',
+      model_used:'',
+      summary_text:'',
+      summary_type:'',
+      tone_version:null,
+      transcript_id:''
     }],
-    token: { token: '' }
+    token: { token: '' },
+  
 };
 
 export const AuthSlice = createSlice({
@@ -101,11 +99,11 @@ export const BackedFilesSlice = createSlice({
   name:'sidebar',
   initialState,
   reducers:{
-    getSidebar:(state,action:PayloadAction<BackedupState[]>) => {
-        state.backedFile = action.payload
+    getSidebar:(state,action:PayloadAction<summarState[]>) => {
+        state.summar = action.payload
     },
     clearGetSidebar:(state)=>{
-      state.backedFile = initialState.backedFile
+      state.summar = initialState.summar
     }
   }
 })

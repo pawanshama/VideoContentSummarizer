@@ -101,7 +101,7 @@ export default function Login() {
       if (response) {
         dispatch(updateAuthByPayload(response));
         toast.success('Login successful!');
-        router.replace('/auth/dashboard');
+        router.replace(`/auth/dashboard/${response?.newUser?.id}`);
       }
     } catch (error) {
       console.error('Login error:', error);

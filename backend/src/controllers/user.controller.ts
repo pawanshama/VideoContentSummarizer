@@ -4,6 +4,7 @@ import { AppDataSource } from '../data-source';
 import { User } from '../entity/User'; // Import your User entity
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
+import { Video } from '../entity/Video';
 // import dotenv, { config } from "dotenv";
 // dotenv.config();
 
@@ -65,7 +66,8 @@ export const loginUser = async (req: Request, res: Response) => {
       res.cookie("token",signing,{
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite:'strict',
-        httpOnly:true
+        httpOnly:true,
+        secure:true
       });
     }
     else{
@@ -78,3 +80,19 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to create user" });
   }
 };
+
+export const protectRoute = async(req: Request, res: Response)=>{
+  try{
+      const id = req.params.id;
+      const user_id = id;
+      const userRepository = AppDataSource.getRepository(Video);
+      const data = await userRepository.findOneBy({user_id})
+      if(!data){
+        return res.status(400).json(false);
+      }
+      return res.status(201).json(true);
+  }
+  catch(error){
+    return res.json(500).json({message:'internal error'});
+  }
+}

@@ -1,6 +1,8 @@
+import { JSX } from "react"
 
 // Define a type for the slice state
 export interface AuthState {
+   newUser: any
    name: String,
    email:String,
    password_hash:String,
@@ -35,6 +37,8 @@ export interface transcriptState{
 };
 
 export interface summaryState{
+    map(arg0: (item: { summary_text: any }, index: React.Key | null | undefined) => JSX.Element): import("react").ReactNode
+    length: number
     id:String,
     text:String,
     type:String,
@@ -63,12 +67,21 @@ export interface BackedupState{
 export interface tok{
     token:String
 }
+export interface summarState{
+   created_at: String,
+   id:string,
+   model_used:String,
+   summary_text:string,
+   summary_type:string,
+   tone_version:null,
+   transcript_id: string
+}
 
 export interface AllInOneState{
    auth:AuthState,
    status:StatusState,
    videoUpload:UploadState,
    video: videoState
-   backedFile:BackedupState[],
+   summar:summarState[],
    token:tok
 };

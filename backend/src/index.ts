@@ -8,13 +8,19 @@ import userRoutes from './routes/user.routes';
 import videoRoutes from './routes/video.routes'; // New: Import video routes
 import userSettingsRoutes from './routes/userSettings.routes'; // New: Import user settings routes
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
+// ✅ Add this before any route/middleware that needs cookies
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true // ✅ Allow credentials (cookies)
+}));
+app.use(cookieParser());
 
 // Middleware
 app.use(express.json()); // For parsing application/json

@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { Video } from '../entity/Video';
+import { In } from 'typeorm';
 import { User } from '../entity/User';
 import { uploadFileToCloudinary } from '../services/cloudinaryService';
 import { processVideoForAI } from '../services/videoProcessingService';
@@ -103,7 +104,8 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
 export const getVideoSummary = async (req: Request, res: Response) => {
   const { videoId } = req.params; // Get video ID from URL parameter
-
+  console.log(req.params);
+  if(!videoId)return res.status(400).json({message:"Boad Request"});
   const videoRepository = AppDataSource.getRepository(Video);
   const transcriptRepository = AppDataSource.getRepository(Transcript);
   const summaryRepository = AppDataSource.getRepository(Summary);
@@ -160,13 +162,37 @@ export const getVideoSummary = async (req: Request, res: Response) => {
 export const backupFile = async (req:Request,res:Response) => {
     try{
         const {user_id} = req.params;
-        console.log(user_id);
+        // console.log(user_id);
         const videoRepository = AppDataSource.getRepository(Video);
-        const uniqueUserBackedData = await videoRepository.findBy({user_id});
-        if(uniqueUserBackedData.length==0){
-          return res.status(404).json({data:uniqueUserBackedData,message:"User Data Not found"});
+        // const uniqueUserBackedData = await videoRepository.findBy({user_id});
+        // if(uniqueUserBackedData.length==0){
+        //   return res.status(404).json({data:uniqueUserBackedData,message:"User Data Not found"});
+        // }
+        // const videoRepository = AppDataSource.getRepository(Video);
+        const video = await videoRepository.find({
+          where: { user_id: user_id },
+          relations: ["user"] // Eager load user if needed for display
+        });
+
+        if (!video) {
+          return res.status(404).json({ message: "Video not found." });
         }
-        return res.status(200).json({message:"all previous searches",data:uniqueUserBackedData});
+        // console.log(video);
+        // Fetch transcript (assuming one-to-one with video)
+        const transcriptRepository = AppDataSource.getRepository(Transcript);
+        const videoIds = video.map(videos => videos.id);
+        
+        const transcript = await transcriptRepository.find({where: {
+             video_id: In(videoIds) // `In` is from 'typeorm'
+        }});
+         const transcriptIds = transcript.map(t => t.id);
+        // Fetch summary (assuming one-to-one with transcript)
+        const summaryRepository = AppDataSource.getRepository(Summary);
+        const summary = await summaryRepository.find({
+          where: { transcript_id: In(transcriptIds) } // Only try to find summary if transcript exists
+        });
+        // return res.status(200).json({message:"all previous searches",data:uniqueUserBackedData});
+        return res.status(202).json({summary,message:`data sent successfully`});
     } 
     catch(error){
        return res.status(500).json({message:"Internal Server Error",error});
