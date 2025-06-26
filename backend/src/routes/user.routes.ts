@@ -7,5 +7,5 @@ const router = Router();
 
 router.post('/signup', signUsers);
 router.post('/login', loginUser);
-router.get('/protectedRoute/:id',checkAdmin,protectRoute);
+router.get('/protectedRoute',checkAdmin,protectRoute);
 export default router;

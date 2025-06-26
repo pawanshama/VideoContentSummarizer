@@ -8,7 +8,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 // import dotenv,{config} from "dotenv";
 // dotenv.config();
 const checkAdmin = (req, res, next) => {
-    console.log(req.body);
+    console.log("I am inside middleware");
     try {
         const token = req.cookies.token;
         if (!token) {

@@ -1,6 +1,6 @@
 
 'use client'
-import React from 'react';
+import React,{useEffect} from 'react';
 import {MessageSquare} from 'lucide-react';
 import { useAppSelector,useAppDispatch } from '@/lib/redux/hooks';
 import { AuthState } from '@/services/types/Auth';
@@ -9,9 +9,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 export default function Navbar() {
   const appName = 'AI buddy';
-  const authUser: AuthState = useAppSelector((state) => state.auth.auth);
-  // const dispatch = useAppDispatch();
+    const getUser = sessionStorage.getItem('name');
+  console.log(getUser)
+  const dispatch = useAppDispatch();
   // const router = useRouter();
+  useEffect(()=>{
+      
+  },[])
   return (
     <header className="bg-white/70 backdrop-blur-md border-b border-gray-200 fixed top-0 w-full z-50 shadow-sm">
   <div className="flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
@@ -30,10 +34,10 @@ export default function Navbar() {
     </Link>
 
     {/* Right-side Auth User */}
-    {authUser && (
+    {getUser && (
       <div className="flex items-center gap-4">
         <span className="text-md font-medium px-4 py-1 rounded-lg bg-gray-100">
-          {authUser.name}
+          {getUser}
         </span>
         {/* Optional: Add a profile image or dropdown menu later here */}
       </div>

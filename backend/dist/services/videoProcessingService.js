@@ -245,7 +245,10 @@ const processVideoForAI = async (videoId) => {
                 'Content-Type': 'application/json'
             }
         });
-        largeModelOutput = colabResponse.data.result; // Assuming Colab returns { "result": "..." }
+
+        largeModelOutput = colabResponse.data.result;
+        
+        console.log(largeModelOutput,'largeModelOutput')// Assuming Colab returns { "result": "..." }
         if (!largeModelOutput) {
             throw new Error('Large model processing in Colab returned empty output.');
         }

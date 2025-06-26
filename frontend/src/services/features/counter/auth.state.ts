@@ -43,6 +43,8 @@ export const AuthSlice = createSlice({
       state.auth.created_at = action.payload.newUser.created_at,
       state.auth.updated_at = action.payload.newUser.updated_at
       console.log(action.payload);
+      sessionStorage.setItem('name',action.payload.newUser.name)
+
     },
     clearAuth:(state)=>{
       state.auth = initialState.auth
@@ -62,6 +64,7 @@ export const VideoIdSlice = createSlice({
       state.videoUpload.video.processing_status = action.payload.video.processing_status
       state.videoUpload.video.title = action.payload.video.title
       state.videoUpload.video.storage_url = action.payload.video.storage_url
+      console.log(action.payload.video);
     },
     clearVideoId:(state)=>{
       state.videoUpload = initialState.videoUpload

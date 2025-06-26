@@ -45,7 +45,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
     const cloudinaryResult = await uploadFileToCloudinary(req.file.path, 'video-summarizer/videos');
     
     // Clean up local temporary file after upload
-    await unlink(req.file.path);
+    unlink(req.file.path);
     console.log(`Local temp file ${req.file.path} deleted.`);
 
     // 2. Create Video entry in DB
@@ -71,11 +71,11 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     // 4. Trigger background processing (ideally, this would be a queue)
     // For now, we call it directly, but in production, enqueue this.
-    processVideoForAI(newVideo.id)
+    await processVideoForAI(newVideo.id)
       .then(() => console.log(`Background processing initiated for video: ${newVideo.id}`))
       .catch((err) => console.error(`Error initiating background processing for video ${newVideo.id}:`, err));
 
-    res.status(202).json({ // 202 Accepted: request accepted, processing will happen later
+    res.status(200).json({ // 202 Accepted: request accepted, processing will happen later
       message: "Video uploaded and processing initiated.",
       video: {
         id: newVideo.id,

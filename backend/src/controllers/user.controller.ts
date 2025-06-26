@@ -83,14 +83,9 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const protectRoute = async(req: Request, res: Response)=>{
   try{
-      const id = req.params.id;
-      const user_id = id;
-      const userRepository = AppDataSource.getRepository(Video);
-      const data = await userRepository.findOneBy({user_id})
-      if(!data){
-        return res.status(400).json(false);
-      }
-      return res.status(201).json(true);
+      const token = req.cookies.token;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      return res.json({ valid: true, user: decoded });
   }
   catch(error){
     return res.json(500).json({message:'internal error'});

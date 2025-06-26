@@ -97,9 +97,11 @@ export default function Login() {
 
     try {
       const response = await updateUserLogin(formData).unwrap();
-
+      console.log(response,'response response')
       if (response) {
         dispatch(updateAuthByPayload(response));
+        //@ts-ignore
+        
         toast.success('Login successful!');
         router.replace(`/auth/dashboard/${response?.newUser?.id}`);
       }
