@@ -7,24 +7,25 @@ import { Provider } from 'react-redux';
 import { store } from '@/services/store/store';
 import { useRouter } from 'next/navigation';
 import { ClipLoader } from 'react-spinners';
+import ProtectedRoute from '@/components/protectedRoute';
 export default function page() {
    const [loading, setLoading] = useState(true);
    const router = useRouter();
   useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await fetch(`http://localhost:8001/api/users/protectedRoute`, {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const ns:string | any = process.env.NEXT_PUBLIC_Backend_Verify_Url
+        const res = await fetch(ns, {
+          method: 'GET', credentials: 'include', });
 
         if (!res.ok) {
           router.push('/auth/login');
         } else {
           setLoading(false);
         }
-      } catch (err) {
-        // router.push('/auth/login');
+      } catch (error) {
+        console.log("error in [id].page",error);
+        router.push('/auth/login');
       }
     }
 
@@ -36,6 +37,7 @@ export default function page() {
   }
 
   return (
+   <ProtectedRoute>
     <Provider store={store}>
            {/* <ProtectedRoute> */}
             <div className='h-full flex flex-col m-0 p-0 w-full'>
@@ -46,6 +48,7 @@ export default function page() {
               </div>
             </div>
            {/* </ProtectedRoute> */}
-    </Provider>
+     </Provider>
+   </ProtectedRoute>
   )
 }

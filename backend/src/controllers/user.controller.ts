@@ -5,8 +5,6 @@ import { User } from '../entity/User'; // Import your User entity
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
 import { Video } from '../entity/Video';
-// import dotenv, { config } from "dotenv";
-// dotenv.config();
 
 export const signUsers = async (req: Request, res: Response) => {
 
@@ -89,5 +87,31 @@ export const protectRoute = async(req: Request, res: Response)=>{
   }
   catch(error){
     return res.json(500).json({message:'internal error'});
+  }
+}
+export const clearCookies = async(req:Request,res:Response)=>{
+  try{
+      res.clearCookie("token");
+      return res.status(200).json({message:"cookie cleared"});
+  }
+  catch(error){ 
+     return res.json(500).json({message:"error while Logout",error})
+  }
+}
+export const getUserById = async(req:Request,res:Response)=>{
+  try{
+    const id = req.params.id;
+    console.log(id);
+    console.log(req.params);
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOneBy({id});
+    if(!user){
+      return res.status(404).json({message:"User not found"});
+    }
+    console.log(user);
+    return res.status(200).json({message:"success",user});
+  }
+  catch(error){
+    return res.status(500).json({message:"error in fetching user by id",error});
   }
 }

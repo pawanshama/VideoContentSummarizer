@@ -1,10 +1,12 @@
 'use client'
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { clearAuth, clearGetSidebar, clearVideo, clearVideoId } from '@/services/features/counter/auth.state';
-import { LogOut, UserCircle, VideoIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AuthState } from '@/services/types/Auth';
+import { LogOut, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 // Add this near the top
 export default function Sidebar ({ stringfromparent }: { stringfromparent: string }){
@@ -13,21 +15,38 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const getUser = sessionStorage.getItem('name')
-  console.log(getUser,'getUser')
-
-  const handleLogout = () => {
+  const authUser :AuthState = useAppSelector(state=>state.auth.auth);
+  // const [authUser,setAuthUser] = useState<AuthState>(res);
+  const handleLogout = async() => {
+    try{
+      const url:String|any = process.env.NEXT_PUBLIC_LOGOUT_URL;
+         const res = await fetch(url,{
+           method:"GET",
+           credentials: 'include'
+         })
+         if (res.ok) {
+           const user = await res.json();
+           router.replace(`/auth/login`);
+         }
+         if (!res.ok) {
+           toast.error("User not Logged out successfully");
+         }
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      router.replace('/auth/login'); // on error, redirect to login
+    }
     dispatch(clearGetSidebar());
     dispatch(clearVideo());
     dispatch(clearAuth());
     dispatch(clearVideoId());
-    router.push('/auth/login');
   };
-
+  // useEffect(()=>{
+  //   setAuthUser(res);
+  // },[res])
 
   return (
     <aside
-      className={`h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out
+      className={`relative min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out
       flex flex-col justify-between ${collapsed ? 'w-[70px]' : `w-full`}`}
     >
       {/* Top - Sidebar Content */}
@@ -41,8 +60,8 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
       </div>
 
       {/* Bottom - Profile & Logout */}
-      <div className="border-t p-4">
-        {getUser  && (
+        {authUser.name!=''  && 
+      <div className="absolute border-t p-4">
           <div className="flex flex-col space-y-2">
             <Link
               href={`/auth/dashboard/${id}/profile`}
@@ -59,8 +78,8 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
               {!collapsed && <span>Logout</span>}
             </button>
           </div>
-        )}
       </div>
+        }
     </aside>
   );
 };

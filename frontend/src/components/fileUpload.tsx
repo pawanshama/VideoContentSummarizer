@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { getSidebar, updateVideoIdByPayload } from '@/services/features/counter/auth.state';
 import { useParams } from 'next/navigation';
 import { summarState } from '@/services/types/Auth';
-// import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { ClipLoader } from 'react-spinners';
 
@@ -20,6 +19,8 @@ export default function MainContainer() {
   const [userVideos,setUserVideos] = useState<summarState[]>(useAppSelector(state=>state.backedFile.summar));
   const videoData = useAppSelector(state=>state.videoId.videoUpload.video); 
   const [userQuery,{isSuccess,isError}] = useLazyGetUserQuery();
+  const [isClicked,setIsClicked] = useState<boolean>(false);
+  const [numberToShow,setNumberToShow] = useState<number>(-1)
 
   // handle file input here.
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,10 +86,18 @@ function MyComponent(isLoading:any ) {
       },[userVideos,videoData])
       
       const handlePopUpFunction = (index: number)=>{
-        toast(`${userVideos[index].summary_text}`)
+        // console.log("button clicked");
+        if(isClicked==false){
+          setNumberToShow(index);
+          setIsClicked(true);
+        }
+        else{
+          setNumberToShow(-1);
+          setIsClicked(false);
+        }
       }
       
-      const hasVideos = userVideos.length > 0 && userVideos[0].id !='';
+      const hasVideos = userVideos.length > 0 && userVideos[0].id.trim() !='';
       
       return (
         <div className="min-h-screen w-full bg-gradient-to-br from-sky-100 to-blue-100 relative px-4 py-10">
@@ -150,7 +159,7 @@ function MyComponent(isLoading:any ) {
 
       {/* Video Cards */}
       {hasVideos && (
-        <div className="pt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={` pt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`}>
           { isLoading ?
           <div className='flex justify-center'>
            { MyComponent(isLoading)}
@@ -184,6 +193,18 @@ function MyComponent(isLoading:any ) {
             <span className="text-sm text-gray-600 truncate max-w-[180px] ml-2">processing {fileData.name}</span>
         </div>
       }
+      {
+        isClicked &&
+            <div
+            key={numberToShow}
+            className="flex w-4/5 justify-center h-1/4 absolute z-10 top-17 bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition cursor-pointer"
+            > 
+              <div className="absolute mb-1/3 bg-white rounded-2xl top-0 left-0" onClick={()=>{handlePopUpFunction(-1)}}>❌</div>
+              <p className="text-sm text-gray-500 mt-4 overflow-y-scroll">
+                {userVideos[numberToShow].summary_text}
+              </p>
+            </div> 
+       }
     </div>
   );
 }

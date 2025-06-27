@@ -34,16 +34,16 @@ export const AuthSlice = createSlice({
   reducers: {
     // Use the PayloadAction type to declare the contents of `action.payload`
     updateAuthByPayload: (state, action: PayloadAction<AuthState>) => {
-      state.auth.name = action.payload.newUser.name,
-      state.auth.id = action.payload.newUser.id,
-      state.auth.email = action.payload.newUser.email,
-      state.auth.password_hash = action.payload.newUser.password_hash,
-      state.auth.status = action.payload.newUser.status,
-      state.auth.subscription = action.payload.newUser.subscription,
-      state.auth.created_at = action.payload.newUser.created_at,
-      state.auth.updated_at = action.payload.newUser.updated_at
-      console.log(action.payload);
-      sessionStorage.setItem('name',action.payload.newUser.name)
+      state.auth.name = action.payload.name,
+      state.auth.id = action.payload.id,
+      state.auth.email = action.payload.email,
+      state.auth.password_hash = action.payload.password_hash,
+      state.auth.status = action.payload.status,
+      state.auth.subscription = action.payload.subscription,
+      state.auth.created_at = action.payload.created_at,
+      state.auth.updated_at = action.payload.updated_at
+      // console.log(action.payload);
+      // sessionStorage.setItem('name',action.payload.name)
 
     },
     clearAuth:(state)=>{

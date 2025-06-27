@@ -4,10 +4,9 @@ import jwt from "jsonwebtoken";
 
 // Middleware to check for admin token
 export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
-  console.log("user is here in protected route");
   try {
     const token = req.cookies.token;
-    console.log(token);
+    // console.log(token);
     // ✅ Token existence check
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
@@ -18,13 +17,12 @@ export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
     if (!secret) {
       return res.status(500).json({ message: "JWT secret not configured" });
     }
-    console.log(secret);
     // ✅ Token verification
     const decoded = jwt.verify(token, secret);
     
     // Optionally attach user to request object
     (req as any).user = decoded;
-
+    console.log("user id.. ",decoded);
     // ✅ Proceed to next middleware or route
     next();
   } catch (error) {

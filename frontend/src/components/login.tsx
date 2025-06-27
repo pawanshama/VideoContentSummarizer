@@ -1,75 +1,5 @@
-// 'use client';
-// import React, { useState } from 'react'
-// import { FaFacebookMessenger } from "react-icons/fa";
-// // import getInstance from '@/lib/utility/util';
-// import { useRouter } from 'next/navigation';
-// import { updateAuthByPayload } from '@/services/features/counter/auth.state'
-// import { useUpdateUserLoginMutation } from '@/services/api';
-// import { useAppDispatch,useAppSelector } from '@/lib/redux/hooks';
-// import toast from 'react-hot-toast';
-
-
-// export default function Login() {
-//     const appName = "AI buddy"
-//     const [formData,setFormData] = useState({name:"",email:"",password_hash:""});
-//     const router = useRouter();
-//     const [updatUser,{isSuccess,isLoading,isError}] = useUpdateUserLoginMutation();
-//     const dispatch = useAppDispatch();
-//     const auth = useAppSelector((state)=>state.auth.auth);
-
-//     const handleUserInput = (event:React.ChangeEvent<HTMLInputElement>) => {
-//         event.preventDefault();
-//         const {name,value}= event.target
-//         console.log(name,value);
-//         setFormData(prev=>({...prev,[name]:value}));
-//     }
-//     const handleUserSubmit = async(e:React.FormEvent<HTMLFormElement>)=>{
-//       e.preventDefault();
-//         try{
-//               console.log(formData);
-//               const response = await updatUser(formData);
-//               if(response.data){
-//                     dispatch(updateAuthByPayload(response.data));
-//                     toast("query passed");
-//                     router.replace('dashboard');
-//                 }
-//                 else{
-//                     toast("query failed");
-//                 }
-              
-//         }
-//         catch(error){
-//               console.log("Error in login page.Handle it correctly",error)
-//         }
-//     }
-//   return (
-//     <div className='w-full box-border m-0 p-0'>
-//       <main className=' flex flex-col lg:w-1/2 md:w-2/3 w-full lg:h-3/4 md:h-5/6 h-3/4 bg-sky-50 text-black rounded-2xl'>
-//           <div className='flex flex-row mt-10 '>
-//               <FaFacebookMessenger className='text-3xl mt-0.5'/>
-//               <div className='text-3xl text-blue-900 '>{appName}</div>
-//           </div>
-
-//           <form className='flex flex-col w-1/3 sm:w-full h-200 bg-sky-50 text-black mt-12' onSubmit={handleUserSubmit}>
-//             <div  className='flex m-8 font-medium justify-center'>
-//               <input onChange={(e)=>handleUserInput(e)} placeholder='    email' type='email' name='email' className='w-100 h-10 border-1 rounded-xl'/>
-//             </div>
-//             <div className='flex m-8 font-medium justify-center'>
-//              <input onChange={(e)=>handleUserInput(e)} placeholder='   fill password ' type='password' name='password_hash' className='w-100 h-10 border-1 rounded-xl '/>
-//             </div>
-//             <div className='flex m-8 justify-center'>
-//                <button type='submit' className='text-2xl bg-green-400 w-1/3 h-10 rounded-3xl justify-center items-center'>Sign In</button>
-//             </div>
-//           </form>
-//       </main>
-//     </div>
-//   )
-// }
-
-
 'use client';
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MessageCircle } from 'lucide-react'; // lucide-react icon
 import { useRouter } from 'next/navigation';
 import { useUpdateUserLoginMutation } from '@/services/api';
@@ -97,19 +27,39 @@ export default function Login() {
 
     try {
       const response = await updateUserLogin(formData).unwrap();
-      console.log(response,'response response')
+      // console.log(response,'response response')
       if (response) {
-        dispatch(updateAuthByPayload(response));
+        dispatch(updateAuthByPayload(response?.newUser));
         //@ts-ignore
         
         toast.success('Login successful!');
         router.replace(`/auth/dashboard/${response?.newUser?.id}`);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      // console.error('Login error:', error);
       toast.error((error as any)?.data?.message || 'Login failed. Please try again.');
     }
   };
+
+  useEffect(() => {
+      const verifyToken = async () => {
+        try {
+          const smt:String|any = process.env.NEXT_PUBLIC_Backend_Verify_Url;
+          const res = await fetch(smt, {
+            method: 'GET',
+            credentials: 'include',
+          });
+            if (res.ok) {
+              const user = await res.json();
+              router.replace(`/auth/dashboard/${user.user.id}`);
+            }
+        } catch (error) {
+          console.error('Error verifying token:', error);
+        }
+      };
+     
+      verifyToken();
+    }, [ router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-100 to-blue-200 p-4">
