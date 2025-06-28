@@ -199,7 +199,7 @@ function MyComponent(isLoading:any ) {
             key={numberToShow}
             className="flex w-4/5 justify-center h-1/4 absolute z-10 top-17 bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition cursor-pointer"
             > 
-              <div className="absolute mb-1/3 bg-white rounded-2xl top-0 left-0" onClick={()=>{handlePopUpFunction(-1)}}>❌</div>
+              <div className="absolute mb-1/3 hover:bg-red-400 bg-white rounded-2xl top-0 left-0" onClick={()=>{handlePopUpFunction(-1)}}>❌</div>
               <p className="text-sm text-gray-500 mt-4 overflow-y-scroll">
                 {userVideos[numberToShow].summary_text}
               </p>

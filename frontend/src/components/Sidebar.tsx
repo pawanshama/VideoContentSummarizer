@@ -16,6 +16,7 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
   const router = useRouter();
   const dispatch = useAppDispatch();
   const authUser :AuthState = useAppSelector(state=>state.auth.auth);
+  // console.log(authUser);
   // const [authUser,setAuthUser] = useState<AuthState>(res);
   const handleLogout = async() => {
     try{
@@ -60,8 +61,9 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
       </div>
 
       {/* Bottom - Profile & Logout */}
-        {authUser.name!=''  && 
-      <div className="absolute border-t p-4">
+        {
+        authUser.name.trim() !=''  && 
+      <div className="border-t p-4">
           <div className="flex flex-col space-y-2">
             <Link
               href={`/auth/dashboard/${id}/profile`}

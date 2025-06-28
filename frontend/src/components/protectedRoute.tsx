@@ -1,11 +1,12 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-
+import { usePathname } from 'next/navigation';
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-
+  const pathname = usePathname();
+  // console.log(pathname);
   const checkForToken = async () => {
     try {
       const news:String|any = process.env.NEXT_PUBLIC_Backend_Verify_Url;
@@ -18,7 +19,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
             // router.replace(`/auth/dashboard/${user.user.id}`);
           }
           if (!res.ok) {
-            router.replace('/auth/login');
+            if(pathname === '/auth/signup'){
+                router.replace('/auth/signup');
+            }
+            else{
+              router.replace('/auth/login');
+            }
           }
       } catch (error) {
         console.error('Error verifying token:', error);
