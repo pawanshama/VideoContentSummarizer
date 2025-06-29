@@ -1,5 +1,5 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -16,6 +16,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         });
           if (res.ok) {
             const user = await res.json();
+            if(pathname === '/auth/dashborad/profile'){
+              router.replace('/auth/dashboard/profile');
+            }
             // router.replace(`/auth/dashboard/${user.user.id}`);
           }
           if (!res.ok) {
