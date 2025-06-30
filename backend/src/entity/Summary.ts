@@ -6,6 +6,9 @@ import { Transcript } from "./Transcript";
 export class Summary {
   @PrimaryGeneratedColumn("uuid")
   id!: string; // Primary key, auto-generated UUID
+  
+  @Column({nullable:true})
+   public_id!:String
 
   @Column({ type: "uuid" })
   transcript_id!: string; // Foreign key column for Transcript

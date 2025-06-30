@@ -22,7 +22,7 @@ export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
     
     // Optionally attach user to request object
     (req as any).user = decoded;
-    console.log("user id.. ",decoded);
+    // console.log("user id.. ",decoded);
     // ✅ Proceed to next middleware or route
     next();
   } catch (error) {

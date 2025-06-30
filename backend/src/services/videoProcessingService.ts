@@ -1,176 +1,3 @@
-// // src/services/videoProcessingService.ts
-// import { AppDataSource } from '../data-source';
-// import { Video } from '../entity/Video';
-// import { Transcript } from '../entity/Transcript';
-// import { Summary } from '../entity/Summary';
-// import { UserSettings } from '../entity/UserSettings';
-// import { UsageLog } from '../entity/UsageLog';
-// import { transcribeAudioWithWhisper, summarizeTextWithGPT4 } from './openAIService';
-// import { logUsage } from './usageLogService';
-// import ffmpeg from 'fluent-ffmpeg';
-// import ffmpegStatic from 'ffmpeg-static';
-// import path from 'path';
-// import fs from 'fs/promises'; // Use promises version of fs
-
-// import axios from 'axios';
-
-// // ... (callLocalWhisperService function definition)
-
-// const callLocalWhisperService = async (videoUrl: string): Promise<string> => {
-//   try {
-//     console.log(`Calling local Whisper server for transcription of: ${videoUrl}`);
-//     const response = await axios.post('http://127.0.0.1:5000/transcribe_video', {
-//       video_url: videoUrl
-//     });
-
-//     if (response.data && response.data.transcript) {
-//       console.log('Local Whisper transcription successful.');
-//       return response.data.transcript;
-//     } else {
-//       throw new Error(`Local Whisper server returned unexpected response: ${JSON.stringify(response.data)}`);
-//     }
-//   } catch (error) {
-//     console.error('Error calling local Whisper server:', error instanceof Error ? error.message : String(error));
-//     if (axios.isAxiosError(error) && error.response) {
-//         // FIX IS HERE: Changed JSON.response to error.response
-//         console.error('Local Whisper server error response:', error.response.data);
-//         throw new Error(`Local Whisper server error: ${error.response.data.error || 'Unknown error'}`);
-//     }
-//     throw new Error(`Failed to get transcription from local Whisper: ${error instanceof Error ? error.message : String(error)}`);
-//   }
-// };
-
-
-// // Tell fluent-ffmpeg where to find the ffmpeg binary
-// if (ffmpegStatic) {
-//   ffmpeg.setFfmpegPath(ffmpegStatic);
-// } else {
-//   console.error('FFmpeg static path not found. Ensure ffmpeg-static is correctly installed.');
-// }
-
-// /**
-//  * Orchestrates the full video processing pipeline: audio extraction, transcription, and summarization.
-//  * This function should ideally be called as a background job.
-//  * @param videoId The ID of the Video entity to process.
-//  */
-// export const processVideoForAI = async (videoId: string): Promise<void> => {
-//   const videoRepository = AppDataSource.getRepository(Video);
-//   const transcriptRepository = AppDataSource.getRepository(Transcript);
-//   const summaryRepository = AppDataSource.getRepository(Summary);
-//   const userSettingsRepository = AppDataSource.getRepository(UserSettings);
-
-//   let video: Video | null = null;
-//   let audioFilePath: string | undefined;
-//   let transcriptText: string | undefined;
-
-//   try {
-//     video = await videoRepository.findOneBy({ id: videoId });
-//     if (!video) {
-//       console.error(`Video with ID ${videoId} not found for processing.`);
-//       await logUsage(video!.user_id, video!.id, 'processing_failed', { message: `Video not found.` });
-//       return;
-//     }
-
-//     console.log(`Starting processing for video: ${video.title} (ID: ${video.id})`);
-//     await videoRepository.update(video.id, { processing_status: 'extracting_audio' });
-//     await logUsage(video.user_id, video.id, 'processing_started', { status: 'extracting_audio' });
-
-//     // --- 1. Extract Audio ---
-//     const outputDir = path.join(__dirname, '../../temp_audio'); // Temporary directory for audio files
-//     await fs.mkdir(outputDir, { recursive: true }); // Ensure directory exists
-//     audioFilePath = path.join(outputDir, `${video.id}.mp3`);
-
-//     console.log(`Extracting audio to: ${audioFilePath}`);
-//     await new Promise<void>((resolve, reject) => {
-//       ffmpeg(video!.storage_url) // Use the Cloudinary URL as input
-//         .noVideo() // Only extract audio
-//         .audioCodec('libmp3lame')
-//         .save(audioFilePath!)
-//         .on('end', () => {
-//           console.log('Audio extraction finished.');
-//           resolve();
-//         })
-//         .on('error', (err) => {
-//           console.error('FFmpeg error:', err);
-//           reject(new Error(`Audio extraction failed: ${err.message}`));
-//         });
-//     });
-
-//     await videoRepository.update(video.id, { processing_status: 'transcribing' });
-//     await logUsage(video.user_id, video.id, 'audio_extracted', { audioFile: audioFilePath });
-
-//     // --- 2. Transcribe Audio with Whisper ---
-//     console.log('Starting Whisper transcription...');
-//     transcriptText = await transcribeAudioWithWhisper(audioFilePath);
-//     if (!transcriptText) {
-//       throw new Error('Transcription returned empty text.');
-//     }
-
-//     // Save Transcript to DB
-//     const newTranscript = transcriptRepository.create({
-//       video_id: video.id,
-//       transcript_content: transcriptText,
-//       model_used: 'whisper-1', // Assuming whisper-1 model was used
-//       tone_version: 'en', // Or detect language if Whisper provides it
-//       created_at: new Date(),
-//     });
-//     await transcriptRepository.save(newTranscript);
-
-//     await videoRepository.update(video.id, { processing_status: 'summarizing' });
-//     await logUsage(video.user_id, video.id, 'transcription_completed', { transcriptId: newTranscript.id });
-
-
-//     // --- 3. Summarize Text with GPT-4 ---
-//     console.log('Starting GPT-4 summarization...');
-
-//     // Fetch user settings to apply preferences to summary
-//     const userSettings = await userSettingsRepository.findOneBy({ user_id: video.user_id });
-//     const summaryType = userSettings?.default_summary_type || 'concise';
-//     const outputLanguage = userSettings?.default_output_language || 'English';
-
-//     const summaryText = await summarizeTextWithGPT4(transcriptText, summaryType, outputLanguage);
-//     if (!summaryText) {
-//       throw new Error('Summarization returned empty text.');
-//     }
-
-//     // Save Summary to DB
-//     const newSummary = summaryRepository.create({
-//       transcript_id: newTranscript.id,
-//       summary_text: summaryText,
-//       summary_type: summaryType,
-//       model_used: 'gpt-4', // Assuming gpt-4 model was used
-//       created_at: new Date(),
-//     });
-//     await summaryRepository.save(newSummary);
-
-//     await videoRepository.update(video.id, { processing_status: 'completed' });
-//     await logUsage(video.user_id, video.id, 'summarization_completed', { summaryId: newSummary.id, status: 'completed' });
-
-//     console.log(`Video processing completed successfully for video ID: ${video.id}`);
-
-//   } catch (error) {
-//     console.error(`Error during video processing for video ID ${videoId}:`, error);
-//     if (video) {
-//       await videoRepository.update(video.id, { processing_status: 'failed' });
-//       await logUsage(video.user_id, video.id, 'processing_failed', {
-//         message: `Video processing failed: ${error instanceof Error ? error.message : String(error)}`,
-//       });
-//     } else {
-//        console.error(`Critical: Video object was null during processing failure for video ID ${videoId}`);
-//     }
-//   } finally {
-//     // Clean up temporary audio file
-//     if (audioFilePath) {
-//       try {
-//         await fs.unlink(audioFilePath);
-//         console.log(`Cleaned up temporary audio file: ${audioFilePath}`);
-//       } catch (cleanupError) {
-//         console.warn(`Failed to clean up temporary audio file ${audioFilePath}:`, cleanupError);
-//       }
-//     }
-//   }
-// };
-
 // src/services/videoProcessingService.ts
 import { AppDataSource } from '../data-source';
 import { Video } from '../entity/Video';
@@ -178,21 +5,12 @@ import { Transcript } from '../entity/Transcript';
 import { Summary } from '../entity/Summary';
 import { UserSettings } from '../entity/UserSettings';
 import { UsageLog } from '../entity/UsageLog';
-// REMOVE: import { transcribeAudioWithWhisper, summarizeTextWithGPT4 } from './openAIService';
 import { summarizeTextWithDeepSeek } from './openAIService'; // Keep summarizeTextWithGPT4 for GPT-4
 import { logUsage } from './usageLogService';
-// import ffmpeg from 'fluent-ffmpeg'; // No longer needed directly here for transcription audio extraction
-// import ffmpegStatic from 'ffmpeg-static'; // No longer needed directly here
 import path from 'path';
 import fs from 'fs/promises';
 import axios from 'axios'; // New: Import axios
 
-// No need for ffmpeg setup here, as Python server handles it
-// if (ffmpegStatic) {
-//   ffmpeg.setFfmpegPath(ffmpegStatic);
-// } else {
-//   console.error('FFmpeg static path not found. Ensure ffmpeg-static is correctly installed.');
-// }
 
 
 /**
@@ -224,7 +42,7 @@ const callLocalWhisperService = async (videoUrl: string): Promise<string> => {
 };
 
 
-export const processVideoForAI = async (videoId: string): Promise<void> => {
+export const processVideoForAI = async (videoId: string,videoIds:any): Promise<void> => {
   const videoRepository = AppDataSource.getRepository(Video);
   const transcriptRepository = AppDataSource.getRepository(Transcript);
   const summaryRepository = AppDataSource.getRepository(Summary);
@@ -309,6 +127,7 @@ export const processVideoForAI = async (videoId: string): Promise<void> => {
     // Save Summary to DB
     const newSummary = summaryRepository.create({
       transcript_id: newTranscript.id,
+      public_id: Object.keys(videoIds).length === 0 ?videoIds?.x :video.video_id,
       summary_text: summaryText,
       summary_type: summaryType,
       model_used: 'gpt-4',

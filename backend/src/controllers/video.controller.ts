@@ -47,7 +47,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
     // Clean up local temporary file after upload
     unlink(req.file.path);
     console.log(`Local temp file ${req.file.path} deleted.`);
-
+    // console.log(cloudinaryResult);
     // 2. Create Video entry in DB
     const newVideo = videoRepository.create({
       user_id: user.id,
@@ -71,7 +71,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     // 4. Trigger background processing (ideally, this would be a queue)
     // For now, we call it directly, but in production, enqueue this.
-    await processVideoForAI(newVideo.id)
+    await processVideoForAI(newVideo.id,cloudinaryResult.video)
       .then(() => console.log(`Background processing initiated for video: ${newVideo.id}`))
       .catch((err) => console.error(`Error initiating background processing for video ${newVideo.id}:`, err));
 
@@ -188,10 +188,15 @@ export const backupFile = async (req:Request,res:Response) => {
          const transcriptIds = transcript.map(t => t.id);
         // Fetch summary (assuming one-to-one with transcript)
         const summaryRepository = AppDataSource.getRepository(Summary);
-        const summary = await summaryRepository.find({
+        const summ = await summaryRepository.find({
           where: { transcript_id: In(transcriptIds) } // Only try to find summary if transcript exists
         });
         // return res.status(200).json({message:"all previous searches",data:uniqueUserBackedData});
+        const summary = summ.sort((a, b) => {
+          const dateA = new Date(a.created_at).getTime();
+          const dateB = new Date(b.created_at).getTime();
+          return dateB - dateA; // Invert the comparison for descending order
+        });
         return res.status(202).json({summary,message:`data sent successfully`});
     } 
     catch(error){
