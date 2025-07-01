@@ -39,7 +39,7 @@ export default function Navbar() {
   },[res])
   return (
     <header className="bg-white/70 backdrop-blur-md border-b border-gray-200 fixed top-0 w-full z-50 shadow-sm">
-  <div className="flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
+  <div className="flex items-center justify-between max-w-7xl px-4 sm:px-6 lg:px-8 h-16">
     
     {/* Logo Section */}
     <Link
@@ -56,7 +56,7 @@ export default function Navbar() {
 
     {/* Right-side Auth User */}
     {authUser.name !='' && (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 fixed right-2">
         <span className="text-md font-medium px-4 py-1 rounded-lg bg-gray-100">
           {authUser.name}
         </span>

@@ -2,7 +2,6 @@ import { JSX } from "react"
 
 // Define a type for the slice state
 export interface AuthState {
-   newUser: any
    name: String,
    email:String,
    password_hash:String,
@@ -37,8 +36,6 @@ export interface transcriptState{
 };
 
 export interface summaryState{
-    map(arg0: (item: { summary_text: any }, index: React.Key | null | undefined) => JSX.Element): import("react").ReactNode
-    length: number
     id:String,
     text:String,
     type:String,
@@ -74,6 +71,7 @@ export interface summarState{
    summary_text:string,
    summary_type:string,
    tone_version:null,
+   public_id:String|any,
    transcript_id: string
 }
 

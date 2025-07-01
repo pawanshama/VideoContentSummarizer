@@ -4,20 +4,18 @@ import { clearAuth, clearGetSidebar, clearVideo, clearVideoId } from '@/services
 import { AuthState } from '@/services/types/Auth';
 import { LogOut, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import {useRouter } from 'next/navigation';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 // Add this near the top
 export default function Sidebar ({ stringfromparent }: { stringfromparent: string }){
-  const param = useParams();
-  const id = param.id;
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const authUser :AuthState = useAppSelector(state=>state.auth.auth);
-  // console.log(authUser);
-  // const [authUser,setAuthUser] = useState<AuthState>(res);
+  let authUser :AuthState = useAppSelector(state=>state.auth.auth);
+  
+  // Function to help in logout.
   const handleLogout = async() => {
     try{
       const url:String|any = process.env.NEXT_PUBLIC_LOGOUT_URL;
@@ -41,14 +39,10 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
     dispatch(clearAuth());
     dispatch(clearVideoId());
   };
-  // useEffect(()=>{
-  //   setAuthUser(res);
-  // },[res])
-
   return (
     <aside
       className={`relative min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out
-      flex flex-col justify-between ${collapsed ? 'w-[70px]' : `w-full`}`}
+      flex flex-col justify-between ${collapsed ? 'w-[70px]' : `w-full`} max-lg:w-[70px]`}
     >
       {/* Top - Sidebar Content */}
       <div>
@@ -66,7 +60,7 @@ export default function Sidebar ({ stringfromparent }: { stringfromparent: strin
       <div className="border-t p-4">
           <div className="flex flex-col space-y-2">
             <Link
-              href={`/auth/dashboard/${id}/profile`}
+              href={`/auth/dashboard/profile`}
               className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition"
             >
               <UserCircle className="w-5 h-5" />

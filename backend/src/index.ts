@@ -9,6 +9,7 @@ import videoRoutes from './routes/video.routes'; // New: Import video routes
 import userSettingsRoutes from './routes/userSettings.routes'; // New: Import user settings routes
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import pdfRoutes from "./routes/features.routes"
 
 // ✅ Add this before any route/middleware that needs cookies
 // Load environment variables from .env file
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/videos', videoRoutes); // New: Register video routes
 app.use('/api/settings', userSettingsRoutes); // New: Register user settings routes
+app.use("/api/summary",pdfRoutes);
 
 // --- Global Error Handler ---
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -42,7 +42,7 @@ const callLocalWhisperService = async (videoUrl: string): Promise<string> => {
 };
 
 
-export const processVideoForAI = async (videoId: string,videoIds:any): Promise<void> => {
+export const processVideoForAI = async (videoId: string,cloudinaryResult:any): Promise<void> => {
   const videoRepository = AppDataSource.getRepository(Video);
   const transcriptRepository = AppDataSource.getRepository(Transcript);
   const summaryRepository = AppDataSource.getRepository(Summary);
@@ -127,7 +127,7 @@ export const processVideoForAI = async (videoId: string,videoIds:any): Promise<v
     // Save Summary to DB
     const newSummary = summaryRepository.create({
       transcript_id: newTranscript.id,
-      public_id: Object.keys(videoIds).length === 0 ?videoIds?.x :video.video_id,
+      public_id: cloudinaryResult.resource_type === 'video' ? cloudinaryResult?.is_audio ? cloudinaryResult?.is_audio?.x : cloudinaryResult?.x : video.video_id,
       summary_text: summaryText,
       summary_type: summaryType,
       model_used: 'gpt-4',

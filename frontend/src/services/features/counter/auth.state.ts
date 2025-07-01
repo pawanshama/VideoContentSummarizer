@@ -21,7 +21,8 @@ const initialState: AllInOneState = {
       summary_text:'',
       summary_type:'',
       tone_version:null,
-      transcript_id:''
+      transcript_id:'',
+      public_id:null
     }],
     token: { token: '' },
   

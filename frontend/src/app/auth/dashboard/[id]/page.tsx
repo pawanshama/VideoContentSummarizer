@@ -39,7 +39,6 @@ export default function page() {
   return (
    <ProtectedRoute>
     <Provider store={store}>
-           {/* <ProtectedRoute> */}
             <div className='h-full flex flex-col m-0 p-0 w-full'>
               <div> <Navbar/></div>
               <div className='flex m-0 p-0 w-full h-full'>
@@ -47,7 +46,6 @@ export default function page() {
                 <div className={`flex w-full h-full justify-end `}> <FileUpload/> </div>
               </div>
             </div>
-           {/* </ProtectedRoute> */}
      </Provider>
    </ProtectedRoute>
   )

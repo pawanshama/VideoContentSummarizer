@@ -1,16 +1,18 @@
 'use client'
-import React, { useState,useEffect, CSSProperties} from 'react';
+import React, { useState,useEffect, CSSProperties, useCallback} from 'react';
 import toast from 'react-hot-toast';
 import { UploadCloud } from 'lucide-react';
 import {  useLazyGetUserQuery, useUploadUserVideoMutation } from '@/services/api';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { getSidebar, updateVideoIdByPayload } from '@/services/features/counter/auth.state';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
+import { fetchPdf,MyComponent } from './extraFiles';
 import { summarState } from '@/services/types/Auth';
-import 'react-loading-skeleton/dist/skeleton.css'
-import { ClipLoader } from 'react-spinners';
+import {SideClickThreeButton} from './sideClickThreeButton'
 
 export default function MainContainer() {
+  let clickedToShowPopUp = 0;
   const params = useParams();
   const userId:any = params.id;
   const dispatch = useAppDispatch();
@@ -18,7 +20,7 @@ export default function MainContainer() {
   const [uploadUserVideo, { isLoading }] = useUploadUserVideoMutation();
   const [userVideos,setUserVideos] = useState<summarState[]>(useAppSelector(state=>state.backedFile.summar));
   const videoData = useAppSelector(state=>state.videoId.videoUpload.video); 
-  const [userQuery,{isSuccess,isError}] = useLazyGetUserQuery();
+  const [userQuery] = useLazyGetUserQuery();
   const [isClicked,setIsClicked] = useState<boolean>(false);
   const [numberToShow,setNumberToShow] = useState<number>(-1)
 
@@ -56,49 +58,34 @@ export default function MainContainer() {
   const getCallingFunction = async()=>{
     try{
       const response:summarState[]|any = await userQuery(userId);
-      dispatch(getSidebar(response?.data?.summary))
-      setUserVideos(response?.data?.summary);
+      dispatch(getSidebar(response?.data?.summary));
+      if(JSON.stringify(response?.data?.summary) !== JSON.stringify(userVideos)){
+        setUserVideos(response?.data?.summary);
+      }
     }
     catch(error){
       toast.error(`Error in fetching previous videos.`);
     }
   }
 
-function MyComponent(isLoading:any ) {
-        const override: CSSProperties = {
-           display:"flex",
-           justifyContent:"center"
-        };
-            if (isLoading) {
-              return (
-                <div className='flex justify-center bg-gray-200 w-3/4 shadow-md rounded-2xl p-6 hover:shadow-lg transition'>
-                   <ClipLoader color={`#99a1af`} loading={isLoading} cssOverride={override}
-                      size={70} aria-label="Loading Spinner" data-testid="loader"/>
-                </div>
-              );
-            }
-            return (
-            <></>
-            );
+  const handlePopUpFunction = (index: number)=>{
+    // console.log("button clicked");
+    if(isClicked==false){
+      setNumberToShow(index);
+      setIsClicked(true);
+    }
+    else{
+      setNumberToShow(-1);
+      setIsClicked(false);
+    }
   }
-      useEffect(()=>{
-        getCallingFunction();
-      },[userVideos,videoData])
-      
-      const handlePopUpFunction = (index: number)=>{
-        // console.log("button clicked");
-        if(isClicked==false){
-          setNumberToShow(index);
-          setIsClicked(true);
-        }
-        else{
-          setNumberToShow(-1);
-          setIsClicked(false);
-        }
-      }
-      
+  useEffect(()=>{
+    getCallingFunction();
+  },[videoData])
+  
+
       const hasVideos = userVideos.length > 0 && userVideos[0].id.trim() !='';
-      
+
       return (
         <div className="min-h-screen w-full bg-gradient-to-br from-sky-100 to-blue-100 relative px-4 py-10">
       {/* Upload */}
@@ -116,7 +103,7 @@ function MyComponent(isLoading:any ) {
 
             {fileData && (
               <>
-                <span className="text-sm text-gray-600 truncate max-w-[180px]">{fileData.name}</span>
+                <span className="text-sm text-gray-600 truncate max-w-[180px]">{fileData.name} </span>
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -170,22 +157,27 @@ function MyComponent(isLoading:any ) {
           {((userVideos.length===1 && userVideos[0]?.id !=='') || (userVideos.length>=2)) && userVideos.map((item, index) => (
             <div
             key={index}
-            className="bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition cursor-pointer"
+            className={`flex w-full bg-white shadow-md ${index===0 ? `border-4 border-solid border-red-300` : ``} rounded-2xl p-4 hover:shadow-lg transition cursor-pointer`}
             onClick={() => {handlePopUpFunction(index)}}
             >
-              <h3 className="text-md font-semibold text-gray-800 truncate">
-                Video {index + 1}
-              </h3>
-              <p className="text-sm text-gray-500 mt-2 line-clamp-3">
-                {item.summary_text}
-              </p>
+              <div className='w-1/4 flex mr-3'>
+                <Image src={!item.public_id? "/Gemini_Generated_Image.jpg"  :`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDNAME}/video/upload/so_1,w_400,h_300,c_fill/${item.public_id}.jpg`} alt='video-image' className ='rounded-2xl items-center' width={400} height={300}/>
+              </div>
+              <div className='w-3/4 '> 
+                <h3 className="text-md font-semibold text-gray-800 truncate">
+                  Video {index + 1}
+                </h3>
+                <p className="text-sm text-gray-500 mt-2 line-clamp-3">
+                  {item.summary_text}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       )}
       {
         isLoading && fileData &&
-        <div className='w-1/8 absolute flex rounded-2xl p-4 shadow-md hover:shadow-lg transition bg-white bottom-3 right-6 z-10'>
+        <div className='w-1/8 max-sm:w-3/8 absolute flex rounded-2xl p-4 shadow-md hover:shadow-lg transition bg-gray-400 top-30 right-6 z-10'>
             <div className="flex w-5 h-5 border-4 border-dotted border-gray-300 rounded-full " >
               <div className="w-3 h-3 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin " >
               </div>
@@ -197,13 +189,24 @@ function MyComponent(isLoading:any ) {
         isClicked &&
             <div
             key={numberToShow}
-            className="flex w-4/5 justify-center h-1/4 absolute z-10 top-17 bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition cursor-pointer"
+            className="flex flex-col w-4/5 justify-center max-sm:h-96 sm:h-96 md:h-1/3 h-1/4 absolute z-10 top-17 bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition cursor-pointer"
             > 
-              <div className="absolute mb-1/3 hover:bg-red-400 bg-white rounded-2xl top-0 left-0" onClick={()=>{handlePopUpFunction(-1)}}>❌</div>
-              <p className="text-sm text-gray-500 mt-4 overflow-y-scroll">
-                {userVideos[numberToShow].summary_text}
-              </p>
+              <div className={`w-full h-1/6 bg-white`} >
+                  {
+                      clickedToShowPopUp ? SideClickThreeButton() : <div className={``} onClick={()=>{clickedToShowPopUp=1;}}>⋮</div>
+                  }
+              </div>
+              <div className='flex h-full w-full bg-white max-lg:flex-col'>
+                <div className='w-1/4 max-lg:h-1/2 max-lg:w-full flex mr-3 '>
+                  <Image src={!userVideos[numberToShow].public_id? "/Gemini_Generated_Image.jpg"  :`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDNAME}/video/upload/so_1,w_400,h_300,c_fill/${userVideos[numberToShow].public_id}.jpg`} alt='video-image' className='w-full rounded-2xl items-center' width={400} height={300}/>  
+                </div>
+              <div className='w-3/4 max-lg:w-full overflow-y-scroll'>
+                <p className="text-sm text-gray-500 mt-4">
+                  {userVideos[numberToShow].summary_text} 
+                </p>  
+              </div>
             </div> 
+          </div>
        }
     </div>
   );

@@ -12,6 +12,7 @@ import { Summary } from '../entity/Summary';     // Import for fetching related 
 import path from 'path';
 import fs from 'fs';
 import { unlink } from 'fs/promises';
+import { UploadApiResponse, UploadStream } from 'cloudinary';
 
 // Utility function to get file extension
 const getFileExtension = (filename: string): string => {
@@ -42,22 +43,21 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     // 1. Upload to Cloudinary
     console.log(`Uploading ${req.file.originalname} to Cloudinary...`);
-    const cloudinaryResult = await uploadFileToCloudinary(req.file.path, 'video-summarizer/videos');
-    
+    const cloudinaryResult:UploadApiResponse|any = await uploadFileToCloudinary(req.file.path, 'video-summarizer/videos');
+    console.log(cloudinaryResult);
     // Clean up local temporary file after upload
     unlink(req.file.path);
     console.log(`Local temp file ${req.file.path} deleted.`);
-    // console.log(cloudinaryResult);
     // 2. Create Video entry in DB
     const newVideo = videoRepository.create({
       user_id: user.id,
       user: user, // Link the User object
-      video_id: cloudinaryResult.public_id, // Use Cloudinary's public ID as our video_id
+      video_id: cloudinaryResult?.public_id, // Use Cloudinary's public ID as our video_id
       title: req.body.title || req.file.originalname, // Use provided title or original filename
       description: req.body.description,
       original_filename: req.file.originalname,
-      storage_url: cloudinaryResult.secure_url,
-      duration_seconds: cloudinaryResult.duration, // Cloudinary often provides video duration
+      storage_url: cloudinaryResult?.secure_url,
+      duration_seconds: cloudinaryResult?.duration, // Cloudinary often provides video duration
       processing_status: 'uploaded',
     });
     await videoRepository.save(newVideo);
@@ -71,7 +71,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     // 4. Trigger background processing (ideally, this would be a queue)
     // For now, we call it directly, but in production, enqueue this.
-    await processVideoForAI(newVideo.id,cloudinaryResult.video)
+    await processVideoForAI(newVideo.id,cloudinaryResult)
       .then(() => console.log(`Background processing initiated for video: ${newVideo.id}`))
       .catch((err) => console.error(`Error initiating background processing for video ${newVideo.id}:`, err));
 
@@ -162,13 +162,7 @@ export const getVideoSummary = async (req: Request, res: Response) => {
 export const backupFile = async (req:Request,res:Response) => {
     try{
         const {user_id} = req.params;
-        // console.log(user_id);
         const videoRepository = AppDataSource.getRepository(Video);
-        // const uniqueUserBackedData = await videoRepository.findBy({user_id});
-        // if(uniqueUserBackedData.length==0){
-        //   return res.status(404).json({data:uniqueUserBackedData,message:"User Data Not found"});
-        // }
-        // const videoRepository = AppDataSource.getRepository(Video);
         const video = await videoRepository.find({
           where: { user_id: user_id },
           relations: ["user"] // Eager load user if needed for display
@@ -177,7 +171,6 @@ export const backupFile = async (req:Request,res:Response) => {
         if (!video) {
           return res.status(404).json({ message: "Video not found." });
         }
-        // console.log(video);
         // Fetch transcript (assuming one-to-one with video)
         const transcriptRepository = AppDataSource.getRepository(Transcript);
         const videoIds = video.map(videos => videos.id);
@@ -191,7 +184,6 @@ export const backupFile = async (req:Request,res:Response) => {
         const summ = await summaryRepository.find({
           where: { transcript_id: In(transcriptIds) } // Only try to find summary if transcript exists
         });
-        // return res.status(200).json({message:"all previous searches",data:uniqueUserBackedData});
         const summary = summ.sort((a, b) => {
           const dateA = new Date(a.created_at).getTime();
           const dateB = new Date(b.created_at).getTime();

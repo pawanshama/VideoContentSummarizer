@@ -2,7 +2,8 @@
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 import path from 'path';
-
+import fs from 'fs'
+import streamifier from "streamifier"
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 cloudinary.config({
@@ -19,16 +20,49 @@ cloudinary.config({
  * @returns Cloudinary upload result.
  */
 export const uploadFileToCloudinary = async (filePath: string, folder: string) => {
+  const stats = fs.statSync(filePath);
+  const fileSizeInMB = stats.size / (1024 * 1024);
+  const LARGE_FILE_THRESHOLD_MB = 100;
+  const eagerTransformations = [
+    { width: 300, height: 300, crop: 'pad', audio_codec: 'none' },
+    { width: 160, height: 100, crop: 'crop', gravity: 'north', audio_codec: 'none' }
+  ];
+
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: "auto", // Automatically detect resource type (video, image, raw)
-      folder: folder,
-      chunk_size: 6000000, // For large files, upload in chunks (6MB)
-      eager: [ // Optional: Pre-process video on upload (e.g., generate thumbnail)
-        { width: 300, height: 300, crop: "pad", audio_codec: "none" },
-        { width: 160, height: 100, crop: "crop", gravity: "north", audio_codec: "none" }
-      ]
-    });
+    
+     let result;
+
+    if (fileSizeInMB > LARGE_FILE_THRESHOLD_MB) {
+      console.log(`🔴 File size ${fileSizeInMB.toFixed(2)}MB > ${LARGE_FILE_THRESHOLD_MB}MB — using upload_large()`);
+
+      result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_large(
+          filePath,
+          {
+            resource_type: 'video',
+            folder,
+            chunk_size: 6_000_000,
+            eager: eagerTransformations,
+            eager_async: false,
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+      });
+
+    } else {
+      console.log(`🟢 File size ${fileSizeInMB.toFixed(2)}MB <= ${LARGE_FILE_THRESHOLD_MB}MB — using upload()`);
+
+      result = await cloudinary.uploader.upload(filePath, {
+        resource_type: 'video',
+        folder,
+        eager: eagerTransformations,
+        eager_async: false,
+      });
+    }
+   
     console.log('Cloudinary Upload Result:', result);
     return result; // Contains public_id, secure_url, etc.
   } catch (error) {

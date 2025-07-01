@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.token;
-    // console.log(token);
     // ✅ Token existence check
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
@@ -22,7 +21,6 @@ export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
     
     // Optionally attach user to request object
     (req as any).user = decoded;
-    // console.log("user id.. ",decoded);
     // ✅ Proceed to next middleware or route
     next();
   } catch (error) {
