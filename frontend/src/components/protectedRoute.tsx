@@ -6,6 +6,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
+  const params = useParams();
+  const id = params.id;
   const checkForToken = async () => {
     try {
       const news:String|any = process.env.NEXT_PUBLIC_Backend_Verify_Url;
@@ -18,6 +20,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
             if(pathname === '/auth/dashboard/profile'){
               router.replace('/auth/dashboard/profile');
             }
+            else if(pathname === `/auth/summary/${id}`){
+              router.replace(`/auth/summary/${id}`);}
           }
           if (!res.ok) {
             if(pathname === '/auth/signup'){

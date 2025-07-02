@@ -1,4 +1,4 @@
-import { JSX } from "react"
+import { JSX, SetStateAction } from "react"
 
 // Define a type for the slice state
 export interface AuthState {
@@ -82,4 +82,13 @@ export interface AllInOneState{
    video: videoState
    summar:summarState[],
    token:tok
+};
+export interface SideClickThreeButtonProps{
+  clicked: {
+    isClicked: boolean,
+    sum:summarState,
+    setIsClicked: React.Dispatch<React.SetStateAction<boolean>>,
+    id:string,
+    setNumberToShow: React.Dispatch<SetStateAction<number>>
+   }
 };

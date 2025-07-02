@@ -7,12 +7,11 @@ import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { getSidebar, updateVideoIdByPayload } from '@/services/features/counter/auth.state';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { fetchPdf,MyComponent } from './extraFiles';
+import { MyComponent } from './extraFiles';
 import { summarState } from '@/services/types/Auth';
-import {SideClickThreeButton} from './sideClickThreeButton'
-
+import SideClickThreeButton from './sideClickThreeButton'
 export default function MainContainer() {
-  let clickedToShowPopUp = 0;
+
   const params = useParams();
   const userId:any = params.id;
   const dispatch = useAppDispatch();
@@ -83,8 +82,7 @@ export default function MainContainer() {
     getCallingFunction();
   },[videoData])
   
-
-      const hasVideos = userVideos.length > 0 && userVideos[0].id.trim() !='';
+    const hasVideos = userVideos.length > 0 && userVideos[0].id.trim() !='';
 
       return (
         <div className="min-h-screen w-full bg-gradient-to-br from-sky-100 to-blue-100 relative px-4 py-10">
@@ -191,9 +189,9 @@ export default function MainContainer() {
             key={numberToShow}
             className="flex flex-col w-4/5 justify-center max-sm:h-96 sm:h-96 md:h-1/3 h-1/4 absolute z-10 top-17 bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition cursor-pointer"
             > 
-              <div className={`w-full h-1/6 bg-white`} >
+              <div className={`w-full h-full relative bg-white mb-3`} >
                   {
-                      clickedToShowPopUp ? SideClickThreeButton() : <div className={``} onClick={()=>{clickedToShowPopUp=1;}}>⋮</div>
+                      <SideClickThreeButton  clicked={{isClicked, setIsClicked,sum:userVideos[numberToShow] , id: userVideos[numberToShow].id, setNumberToShow}}/>
                   }
               </div>
               <div className='flex h-full w-full bg-white max-lg:flex-col'>

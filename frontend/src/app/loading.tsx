@@ -1,12 +1,14 @@
 'use client';
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 
 const backendVerifyUrl = `http://localhost:8001/api/users/protectedRoute`;
 
 export default function CatchAll() {
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
+  const id = params.id; 
   useEffect(() => {
     const verifyToken = async () => {
       try {
@@ -17,7 +19,12 @@ export default function CatchAll() {
         });
           if (res.ok) {
             const user = await res.json();
-            router.replace(`/auth/dashboard/${user.user.id}`);
+            if(pathname === `/auth/summary/${id}`){
+              router.replace(`/auth/summary/${id}`);
+            }
+            else{  
+              router.replace(`/auth/dashboard/${user.user.id}`);
+            }
           }
           if (!res.ok) {
             router.replace('/auth/login');

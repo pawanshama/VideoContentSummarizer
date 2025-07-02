@@ -1,13 +1,12 @@
 'use client'
-import { useAppSelector } from "@/lib/redux/hooks";
-import { AuthState } from "@/services/types/Auth";
-import { CSSProperties, useCallback } from "react";
+import { CSSProperties} from "react";
 import { ClipLoader } from "react-spinners";
 
-export const fetchPdf = async(numberToShow:number)=>{
-    const userVideos:AuthState|any = useAppSelector(state=>state.auth.auth)
+export const fetchPdf = async(id:string)=>{
+  // console.log(id);
+    // const userVideos = authState.videos; 
          try{
-              const response = await fetch(`http://localhost:8001/api/summary/generate-pdf/${userVideos[numberToShow].id}`, {
+              const response = await fetch(`http://localhost:8001/api/summary/generate-pdf/${id}`, {
                       method: 'Get',
                       credentials:'include'
                     });
