@@ -8,6 +8,7 @@ import { store } from '@/services/store/store';
 import { useRouter } from 'next/navigation';
 import { ClipLoader } from 'react-spinners';
 import ProtectedRoute from '@/components/protectedRoute';
+
 export default function page() {
    const [loading, setLoading] = useState(true);
    const router = useRouter();

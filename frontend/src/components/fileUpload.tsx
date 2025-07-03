@@ -10,6 +10,31 @@ import Image from 'next/image';
 import { MyComponent } from './extraFiles';
 import { summarState } from '@/services/types/Auth';
 import SideClickThreeButton from './sideClickThreeButton'
+import { Metadata } from 'next';
+import Link from 'next/link'; // Import Link for navigation to individual summary pages
+
+// Import react-share components
+import {
+  WhatsappShareButton, WhatsappIcon,
+  FacebookShareButton, FacebookIcon,
+  TwitterShareButton, XIcon,
+  LinkedinShareButton, LinkedinIcon,
+  EmailShareButton, EmailIcon,
+} from 'react-share';
+
+interface Summary {
+  id: string; // This is the actual summary ID, essential for unique links
+  title: string;
+  text: string;
+  thumbnail: string; // Cloudinary public ID
+  createdAt: string;
+  // Add other summary properties as they exist in your backend response
+}
+
+interface UserDashboardProps {
+  params: { id: string }; // This 'id' is the USER ID
+}
+
 export default function MainContainer() {
 
   const params = useParams();
@@ -170,7 +195,7 @@ export default function MainContainer() {
                 </p>
               </div>
             </div>
-          ))}
+           ))}
         </div>
       )}
       {
