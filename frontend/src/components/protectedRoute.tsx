@@ -8,6 +8,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const pathname = usePathname();
   const params = useParams();
   const id = params.id;
+  if(id === undefined){
+    console.error("ID is undefined, redirecting to login");
+    router.replace('/auth/login');
+    return null; // Prevent rendering if ID is not available
+  }
   const checkForToken = async () => {
     try {
       const news:String|any = process.env.NEXT_PUBLIC_Backend_Verify_Url;

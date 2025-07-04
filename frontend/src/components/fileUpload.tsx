@@ -1,7 +1,7 @@
 'use client'
-import React, { useState,useEffect, CSSProperties, useCallback} from 'react';
+import React, { useState,useEffect} from 'react';
 import toast from 'react-hot-toast';
-import { UploadCloud } from 'lucide-react';
+import { Copy, StopCircle, UploadCloud, Volume2 } from 'lucide-react';
 import {  useLazyGetUserQuery, useUploadUserVideoMutation } from '@/services/api';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { getSidebar, updateVideoIdByPayload } from '@/services/features/counter/auth.state';
@@ -10,31 +10,7 @@ import Image from 'next/image';
 import { MyComponent } from './extraFiles';
 import { summarState } from '@/services/types/Auth';
 import SideClickThreeButton from './sideClickThreeButton'
-import { Metadata } from 'next';
-import Link from 'next/link'; // Import Link for navigation to individual summary pages
-
-// Import react-share components
-import {
-  WhatsappShareButton, WhatsappIcon,
-  FacebookShareButton, FacebookIcon,
-  TwitterShareButton, XIcon,
-  LinkedinShareButton, LinkedinIcon,
-  EmailShareButton, EmailIcon,
-} from 'react-share';
-
-interface Summary {
-  id: string; // This is the actual summary ID, essential for unique links
-  title: string;
-  text: string;
-  thumbnail: string; // Cloudinary public ID
-  createdAt: string;
-  // Add other summary properties as they exist in your backend response
-}
-
-interface UserDashboardProps {
-  params: { id: string }; // This 'id' is the USER ID
-}
-
+import { speakText,stopSpeaking,copyToClipboard } from './extraFiles';
 export default function MainContainer() {
 
   const params = useParams();
@@ -47,7 +23,10 @@ export default function MainContainer() {
   const [userQuery] = useLazyGetUserQuery();
   const [isClicked,setIsClicked] = useState<boolean>(false);
   const [numberToShow,setNumberToShow] = useState<number>(-1)
-
+  const [isCopyToClipboardClicked,setIsCopyToClipboardClicked] = useState<boolean>(false);
+  const [isTextToSpeechClicked,setIsTextToSpeechClicked] = useState<boolean>(false);
+  // Initialize speech synthesis
+  const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
   // handle file input here.
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -58,8 +37,7 @@ export default function MainContainer() {
       toast.error('Please select a valid video file');
     }
     e.target.value = '';
-  };
-  
+  }; 
   //handle upload here
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +46,7 @@ export default function MainContainer() {
     const formData = new FormData();
     formData.append('videoFile', fileData);
     formData.append('user_id', userId);
-
+    
     try {
       const res = await uploadUserVideo({ formData }).unwrap();
       dispatch(updateVideoIdByPayload(res));
@@ -78,7 +56,7 @@ export default function MainContainer() {
       toast.error('Upload failed');
     }
   };
-  
+  //fetching the previous videos of the user
   const getCallingFunction = async()=>{
     try{
       const response:summarState[]|any = await userQuery(userId);
@@ -91,9 +69,10 @@ export default function MainContainer() {
       toast.error(`Error in fetching previous videos.`);
     }
   }
-
+  //function to handle the click on the video card
   const handlePopUpFunction = (index: number)=>{
     // console.log("button clicked");
+    setIsCopyToClipboardClicked(false);
     if(isClicked==false){
       setNumberToShow(index);
       setIsClicked(true);
@@ -111,7 +90,6 @@ export default function MainContainer() {
 
       return (
         <div className="min-h-screen w-full bg-gradient-to-br from-sky-100 to-blue-100 relative px-4 py-10">
-      {/* Upload */}
       {hasVideos ? (
         <div className="absolute top-18 right-6 z-10">
           <form
@@ -223,10 +201,15 @@ export default function MainContainer() {
                 <div className='w-1/4 max-lg:h-1/2 max-lg:w-full flex mr-3 '>
                   <Image src={!userVideos[numberToShow].public_id? "/Gemini_Generated_Image.jpg"  :`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDNAME}/video/upload/so_1,w_400,h_300,c_fill/${userVideos[numberToShow].public_id}.jpg`} alt='video-image' className='w-full rounded-2xl items-center' width={400} height={300}/>  
                 </div>
-              <div className='w-3/4 max-lg:w-full overflow-y-scroll'>
+              <div className='flex flex-col items-start w-3/4 max-lg:w-full overflow-y-scroll'>
                 <p className="text-sm text-gray-500 mt-4">
                   {userVideos[numberToShow].summary_text} 
                 </p>  
+                <div className='flex bg-white w-1/3 h-1/9 mt-3 mb-4 gap-3'>
+                  <Copy className="w-4 h-4 text-gray-400 cursor-pointer mt-1" fill={isCopyToClipboardClicked ? `rgb(128, 128, 128)`:`white`} onClick={()=>{copyToClipboard(userVideos[numberToShow].summary_text,setIsCopyToClipboardClicked);}}/>
+                  <Volume2 className="w-4 h-4 text-gray-400 cursor-pointer mt-1" fill={isTextToSpeechClicked? `rbg(128,128,128)`:`white`} onClick={()=>{speakText(userVideos[numberToShow].summary_text,synth,setIsTextToSpeechClicked)}}/>
+                  <StopCircle className="w-4 h-4 text-gray-400 cursor-pointer mt-1" onClick={()=>{stopSpeaking(synth,setIsTextToSpeechClicked)}}/>
+                </div>
               </div>
             </div> 
           </div>

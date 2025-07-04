@@ -1,10 +1,7 @@
 'use client'
-import { CSSProperties} from "react";
+import { CSSProperties, useCallback} from "react";
 import { ClipLoader } from "react-spinners";
-
 export const fetchPdf = async(id:string)=>{
-  // console.log(id);
-    // const userVideos = authState.videos; 
          try{
               const response = await fetch(`http://localhost:8001/api/summary/generate-pdf/${id}`, {
                       method: 'Get',
@@ -46,3 +43,23 @@ export function MyComponent(isLoading:any ) {
              <></>
             );
 }
+export const speakText = (summary_text: string, synth: SpeechSynthesis | null,setIsTextToSpeechClicked:React.Dispatch<React.SetStateAction<boolean>>) => {
+    if(!synth) return;
+    const utterance = new SpeechSynthesisUtterance(summary_text); 
+    utterance.voice = synth.getVoices().find(voice => voice.name === 'Google Uk') || synth.getVoices()[0]; 
+    utterance.rate = 1; // Set the speech rate (1 is normal speed)
+    synth.cancel(); // Cancel any ongoing speech
+    synth.speak(utterance);
+    setIsTextToSpeechClicked(true);
+};
+export  const stopSpeaking = (synth:SpeechSynthesis | null,setIsTextToSpeechClicked:React.Dispatch<React.SetStateAction<boolean>>) => {
+    if(synth) synth.cancel();
+    setIsTextToSpeechClicked(false);
+};
+export const copyToClipboard = (text: string, setIsCopyToClipboardClicked:React.Dispatch<React.SetStateAction<boolean>>) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setIsCopyToClipboardClicked(true);
+    }).catch((err) => {
+      console.error('Failed to copy: ', err);
+    });
+};
