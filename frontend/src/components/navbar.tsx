@@ -3,9 +3,11 @@ import React,{useEffect, useState} from 'react';
 import {MessageSquare} from 'lucide-react';
 import { useAppSelector,useAppDispatch } from '@/lib/redux/hooks';
 import { AuthState } from '@/services/types/Auth';
-import { clearAuth, clearGetSidebar, clearVideo, clearVideoId, updateAuthByPayload } from '@/services/features/counter/auth.state';
-import { useParams, useRouter } from 'next/navigation';
+import { updateAuthByPayload } from '@/services/features/counter/auth.state';
+import { useParams,useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { clearAuth, clearGetSidebar, clearVideo, clearVideoId } from '@/services/features/counter/auth.state';
+import toast from 'react-hot-toast';
 export default function Navbar() {
   const appName = 'AI buddy';
   const res:AuthState = useAppSelector(state=>state.auth.auth);
@@ -13,6 +15,7 @@ export default function Navbar() {
   const param = useParams();
   const id:string|any = param.id;
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   useEffect(()=>{
     const functionToFetchAuth = async()=>{
@@ -26,6 +29,10 @@ export default function Navbar() {
          if(res.ok){
             const response = await res.json();
             dispatch(updateAuthByPayload(response.user));
+         }
+         else{
+            //  handleLogout();
+             console.log("error in fetching auth user");
          }
       }
       catch(error){
@@ -67,3 +74,11 @@ export default function Navbar() {
 </header>
   );
 }
+
+function dispatch(arg0: { payload: AuthState; type: "auth/updateAuthByPayload"; }) {
+  throw new Error('Function not implemented.');
+}
+function handleLogout() {
+  throw new Error('Function not implemented.');
+}
+

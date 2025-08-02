@@ -1,6 +1,10 @@
 'use client'
-import { CSSProperties, useCallback} from "react";
+import { useRouter } from "next/router";
+import { CSSProperties} from "react";
+import toast from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { clearAuth, clearGetSidebar, clearVideo, clearVideoId } from '@/services/features/counter/auth.state';
 export const fetchPdf = async(id:string)=>{
          try{
               const response = await fetch(`http://localhost:8001/api/summary/generate-pdf/${id}`, {

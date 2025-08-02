@@ -18,7 +18,14 @@ export const checkAdmin = (req: Request, res: Response, next: NextFunction) => {
     }
     // ✅ Token verification
     const decoded = jwt.verify(token, secret);
-    
+    if (decoded && typeof decoded === "object" && "id" in decoded) {
+        const id = decoded.id;
+        if(req.params.id && req.params.id !== id){
+          console.log("Unauthorized access attempt by user:", id);
+            return res.status(403).json({ message: "You are not authorized to access this user",id });
+        } 
+    }
+    // console.log(decoded);
     // Optionally attach user to request object
     (req as any).user = decoded;
     // ✅ Proceed to next middleware or route

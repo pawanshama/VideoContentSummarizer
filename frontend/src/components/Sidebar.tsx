@@ -1,44 +1,42 @@
 'use client'
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
-import { clearAuth, clearGetSidebar, clearVideo, clearVideoId } from '@/services/features/counter/auth.state';
 import { AuthState } from '@/services/types/Auth';
 import { LogOut, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import {useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { clearAuth, clearGetSidebar, clearVideo, clearVideoId } from '@/services/features/counter/auth.state';
+import {useRouter} from 'next/navigation';
 import toast from 'react-hot-toast';
-
 // Add this near the top
 export default function Sidebar ({ stringfromparent }: { stringfromparent: string }){
   const [collapsed, setCollapsed] = useState(false);
-  const router = useRouter();
-  const dispatch = useAppDispatch();
   let authUser :AuthState = useAppSelector(state=>state.auth.auth);
-  
-  // Function to help in logout.
+  const dispatch = useAppDispatch();
+  const router = useRouter();
   const handleLogout = async() => {
-    try{
-      const url:String|any = process.env.NEXT_PUBLIC_LOGOUT_URL;
-         const res = await fetch(url,{
-           method:"GET",
-           credentials: 'include'
-         })
-         if (res.ok) {
-           const user = await res.json();
-           router.replace(`/auth/login`);
-         }
-         if (!res.ok) {
-           toast.error("User not Logged out successfully");
-         }
-    } catch (error) {
-      console.error('Error verifying token:', error);
-      router.replace('/auth/login'); // on error, redirect to login
+      try{
+        const url:String|any = process.env.NEXT_PUBLIC_LOGOUT_URL;
+           const res = await fetch(url,{
+             method:"GET",
+             credentials: 'include'
+           })
+           if (res.ok) {
+             const user = await res.json();
+             router.replace(`/auth/login`);
+           }
+           if (!res.ok) {
+             toast.error("User not Logged out successfully");
+           }
+      } catch (error) {
+        console.error('Error verifying token:', error);
+        router.replace('/auth/login'); // on error, redirect to login
     }
-    dispatch(clearGetSidebar());
-    dispatch(clearVideo());
-    dispatch(clearAuth());
-    dispatch(clearVideoId());
-  };
+    // Function to help in logout.
+      dispatch(clearGetSidebar());
+      dispatch(clearVideo());
+      dispatch(clearAuth());
+      dispatch(clearVideoId());
+      };
   return (
     <aside
       className={`relative min-h-screen bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out

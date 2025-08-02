@@ -98,15 +98,33 @@ export const clearCookies = async(req:Request,res:Response)=>{
 }
 export const getUserById = async(req:Request,res:Response)=>{
   try{
-    const id = req.params.id;
-    // console.log(id);
-    console.log(req.params);
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    // ✅ JWT_SECRET existence check
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ message: "JWT secret not configured" });
+    }
+     // ✅ Token verification
+    const decoded = jwt.verify(token, secret);
+    let id: any;
+    if (typeof decoded === "object" && decoded !== null && "id" in decoded) {
+      id = (decoded as jwt.JwtPayload).id;
+    } else {
+      return res.status(400).json({ message: "Invalid token payload" });
+    }
+    const user_id = req.params.id;
+    if(id !== user_id){
+      return res.status(403).json({message:"You are not authorized to access this user"});
+    }
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOneBy({id});
     if(!user){
       return res.status(404).json({message:"User not found"});
     }
-    console.log(user);
+    // console.log(user);
     return res.status(200).json({message:"success",user});
   }
   catch(error){

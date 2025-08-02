@@ -13,7 +13,7 @@ export default function page() {
    const [loading, setLoading] = useState(true);
    const router = useRouter();
   useEffect(() => {
-    async function checkAuth() {
+    const checkAuth=async()=> {
       try {
         const ns:string | any = process.env.NEXT_PUBLIC_Backend_Verify_Url
         const res = await fetch(ns, {
